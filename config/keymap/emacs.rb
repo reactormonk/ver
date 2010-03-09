@@ -44,15 +44,15 @@ module VER
     map [:killing, :next_char],     %w[Control-d], %w[Delete]
     map :kill_line,                 %w[Control-k]
     # map [:killing, :end_of_sentence], %w[Alt-k]
-    map [:killing, :next_word],       %w[Alt-d]
-    map [:killing, :prev_word],       %w[Alt-BackSpace]
+    map [:killing, :next_word],     %w[Alt-d]
+    map [:killing, :prev_word],     %w[Alt-BackSpace]
   end
 
   minor_mode :move do
     handler Methods::Move
 
     handler :at_insert
-    map :end_of_buffer,     %w[Alt-greater]
+    map :end_of_buffer,   %w[Alt-greater]
     map :end_of_line,     %w[Control-e], %w[End]
     map :next_char,       %w[Control-f], %w[Right]
     map :next_line,       %w[Control-n], %w[Down]
@@ -98,7 +98,7 @@ module VER
     # map :indent_line,                       %w[greater]
     # map :unindent_line,                     %w[less]
     # map :join_line_forward,                 %w[J]
-    map :open_file_under_cursor,            %w[g f]
+    map :open_file_under_cursor,            %w[Control-x i]
     # map :smart_evaluate,                    %w[Alt-e], %w[Control-m e]
 
     handler Methods::SearchAndReplace
@@ -109,14 +109,14 @@ module VER
     inherits :basic, :move, :search
 
     handler :at_sel
-    map :comment,         %w[comma c]
+    # map :comment,         %w[comma c]
     map :copy,            %w[Alt-w]
     # map :indent,          %w[greater]
     map :kill,            %w[Control-w]
-    # map :lower_case,      %w[u]
+    map :lower_case,      %w[Control-x Control-l]
     # map :replace_string,  %w[c]
     # map :toggle_case,     %w[asciitilde]
-    # map :upper_case,      %w[U]
+    map :upper_case,      %w[Control-x Control-u]
     # map :uncomment,       %w[comma u]
     # map :unindent,        %w[less]
 
@@ -130,7 +130,7 @@ module VER
   minor_mode :select_char do
     inherits :select
 
-    become :control,             %w[Control-g], %w[Escape]
+    become :control, %w[Control-g], %w[Escape]
     # become :select_replace_char, %w[r]
 
     handler :at_sel
@@ -188,7 +188,7 @@ module VER
   major_mode :MiniBuffer do
     use :readline
 
-    map :abort,           %w[Escape], %w[Control-c]
+    map :abort,           %w[Control-g], %w[Escape]
     map :attempt,         %w[Return]
     map :complete_large,  %w[Double-Tab]
     map :complete_small,  %w[Tab]
@@ -209,7 +209,7 @@ module VER
     inherits :readline
 
     map :completion, %w[Tab]
-    map :cancel,     %w[Escape]
+    map :cancel,     %w[Control-g], %w[Escape]
     map :next_line,  %w[Down], %w[Control-j], %w[Control-n]
     map :prev_line,  %w[Up], %w[Control-k], %w[Control-p]
   end
