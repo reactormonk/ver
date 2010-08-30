@@ -266,8 +266,8 @@ LISP
 
       it 'inserts newlines in the middle of a line' do
         with_text(:Ruby){|text|
-          text.insert :insert, "one two"
-          text.mark_set :insert, '4.0'
+          text.insert :insert, "onetwo"
+          text.mark_set :insert, '1.3'
           Indent.newline(text)
         }.should == "one\ntwo"
       end

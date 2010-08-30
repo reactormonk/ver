@@ -1,7 +1,9 @@
 module VER
   module Methods
     module SmartAutoindent
-      def self.newline(text)
+      extend self
+
+      def newline(text)
         if text.options.autoindent
           indented_newline(text)
         else
@@ -9,7 +11,7 @@ module VER
         end
       end
 
-      def self.newline_below(text)
+      def newline_below(text)
         if text.options.autoindent
           text.mark_set('insert', 'insert lineend')
           newline(text)
@@ -19,7 +21,7 @@ module VER
         end
       end
 
-      def self.newline_above(text)
+      def newline_above(text)
         Undo.record text do |record|
           if text.index(:insert).y > 1
             Move.prev_line(text)
@@ -33,9 +35,10 @@ module VER
         end
       end
 
-      def self.indented_newline(text, record = text)
+      def indented_newline(text, record = text)
         settings = indent_settings(text)
         increase, decrease = settings.values_at(:increase, :decrease)
+
         unless increase || decrease
           record.insert :insert, "\n"
           return
@@ -45,14 +48,43 @@ module VER
           "insert - 1 lines linestart",
           "insert - 1 lines lineend"
         )
+
+        cur_line = text.get(
+          "insert linestart",
+          "insert"
+        )
+
+        cur_indent, next_indent = *weight_lines(ref_line, cur_line, increase, decrease)
+
+        if text.index('insert - 1 lines') == text.index('insert')
+          # first line, replace is futile
+          next_indent -= 1
+        elsif cur_line =~ /^\p{Space}+$/
+          record.replace('insert linestart', 'insert lineend', '')
+        else
+          cur_indent = [0, cur_indent].max
+          record.replace(
+            'insert linestart',
+            'insert',
+            (' ' * (cur_indent * 2)) << cur_line.lstrip
+          )
+        end
+
+        next_indent = [0, next_indent].max
+
+        record.insert('insert', "\n#{' ' * (next_indent * 2)}") # TODO tabs?
+      end
+
+      # @param [String] ref_line The line we take as reference wherever we should 
+      #    decrease the indentation of the previous line
+      # @param [String] cur_line Current line where we want to create a newline.
+      # @param [Regex] increase Regex to determine an increase pattern.
+      # @param [Regex] decrease Regex to determine an decrease pattern.
+      def weight_lines(ref_line, cur_line, increase, decrease)
         ref = ref_line[/^\s*/].size / 2
         ref_inc = increase ? ref_line.scan(increase).size : 0
         ref_dec = decrease ? ref_line.scan(decrease).size : 0
 
-        cur_line = text.get(
-          "insert linestart",
-          "insert lineend"
-        )
         cur_inc = increase ? cur_line.scan(increase).size : 0
         cur_dec = decrease ? cur_line.scan(decrease).size : 0
 
@@ -75,46 +107,27 @@ module VER
           end
         ].join
 
-        cur_indent, next_indent =
-          case pattern
-          when '++'; [ref + 1, ref + 2]
-          when '+-'; [ref,     ref]
-          when '+='; [ref,     ref]
-          when '+?'; [ref + 1, ref + 1]
-          when '-+'; [ref,     ref]
-          when '--'; [ref - 1, ref - 2]
-          when '-='; [ref,     ref]
-          when '-?'; [ref,     ref]
-          when '=+'; [ref + 1, ref + 1]
-          when '=-'; [ref,     ref]
-          when '=='; [ref,     ref]
-          when '=?'; [ref + 1, ref + 1]
-          when '?+'; [ref,     ref + 1]
-          when '?-'; [ref - 1, ref - 2]
-          when '?='; [ref - 1, ref]
-          when '??'; [ref,     ref]
-          end
-
-        if text.index('insert - 1 line') == text.index('insert')
-          # first line, replace is futile
-          next_indent -= 1
-        elsif cur_line =~ /\S/
-          cur_indent = [0, cur_indent].max
-          record.replace(
-            'insert linestart',
-            'insert lineend',
-            (' ' * (cur_indent * 2)) << cur_line.lstrip
-          )
-        else # that was an empty line
-          record.replace('insert linestart', 'insert lineend', '')
+        case pattern
+        when '++'; [ref + 1, ref + 2]
+        when '+-'; [ref,     ref]
+        when '+='; [ref,     ref]
+        when '+?'; [ref + 1, ref + 1]
+        when '-+'; [ref,     ref]
+        when '--'; [ref - 1, ref - 2]
+        when '-='; [ref,     ref]
+        when '-?'; [ref,     ref]
+        when '=+'; [ref + 1, ref + 1]
+        when '=-'; [ref,     ref]
+        when '=='; [ref,     ref]
+        when '=?'; [ref + 1, ref + 1]
+        when '?+'; [ref,     ref + 1]
+        when '?-'; [ref - 1, ref - 2]
+        when '?='; [ref - 1, ref]
+        when '??'; [ref,     ref]
         end
-
-        next_indent = [0, next_indent].max
-
-        record.insert('insert lineend', "\n#{' ' * (next_indent * 2)}")
       end
 
-      def self.indent_settings(text)
+      def indent_settings(text)
         return {} unless text.load_preferences
 
         indent_settings = {}
