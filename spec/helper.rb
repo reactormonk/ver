@@ -1,6 +1,6 @@
 require 'bacon'
 # Bacon.summary_at_exit
-
+$LOAD_PATH.unshift(File.expand_path('../..', __FILE__))
 $LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
 require 'lib/ver'
 
