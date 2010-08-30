@@ -68,10 +68,10 @@ module VER
           if string =~ /\n\Z/ # ends with newline
             string = "\n#{string}".chomp * count # # put newline in front
             buffer.insert = buffer.at_insert.lineend
-            record.insert(:insert, string)
+            record.insert(:insert, string * count)
             buffer.insert = buffer.at_insert.linestart
           else
-            pastie_string_after!(record, count, string)
+            record.insert(:insert, string * count)
           end
         end
       end
@@ -82,16 +82,9 @@ module VER
             string = "\n#{string}".chomp * count # # put newline in front
             buffer.insert = buffer.at_insert.lineend
             record.insert(:insert, string)
-          else
-            pastie_string_after!(record, count, string)
           end
+          record.insert(:insert, string * count)
         end
-      end
-
-      def pastie_string_after!(buffer, count, string)
-        add = buffer.at_eol? ? '0' : '1'
-        buffer.insert = buffer.at_insert + (add + ' displaychars')
-        buffer.insert(:insert, string * count)
       end
 
       # the vim and the ver, the vim and the ver,
