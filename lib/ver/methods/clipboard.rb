@@ -68,7 +68,7 @@ module VER
           if string =~ /\n\Z/ # ends with newline
             string = "\n#{string}".chomp * count # # put newline in front
             buffer.insert = buffer.at_insert.lineend
-            record.insert(:insert, string * count)
+            record.insert(:insert, string)
             buffer.insert = buffer.at_insert.linestart
           else
             record.insert(:insert, string * count)
