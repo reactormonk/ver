@@ -47,7 +47,9 @@ module VER
         update_only if update_on_change
       end
 
-      # @param [Array<Object>] values the items to be inserted into the tree
+      # @param [Array<Array>|Array] Values the items to be inserted into the tree.
+      #   For multiple columns, use an Array inside an Array. They get placed into
+      #   the tree in order.
       # @return [Array<Item>] inserted items
       def update_items(values)
         values.map{|value|
