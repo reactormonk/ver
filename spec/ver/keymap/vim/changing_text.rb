@@ -68,6 +68,12 @@ Quam dolorem dignissimos perferendis.
         buffer.minor_mode?(:insert).should.be.nil
         buffer.get('1.0', '1.0 lineend').should == "entore voluptatibus dolorem assumenda."
 
+        type '$bcw'
+        buffer.minor_mode?(:insert).should.not.be.nil
+        type '<Escape>'
+        buffer.minor_mode?(:insert).should.be.nil
+        buffer.get('1.0', '1.0 lineend').should == "entore voluptatibus dolorem assumenda"
+
         # this is a rabbit-hole, don't fix until it becomes annoying.
         # type 'c3l'
         # buffer.minor_mode?(:insert).should.not.be.nil
