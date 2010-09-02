@@ -164,7 +164,7 @@ module VER
 
     minor_mode :insert do
       handler Methods::SmartAutoindent
-      map :newline, %w[Return]
+      map :newline, '<Return>'
     end
   end
 end
